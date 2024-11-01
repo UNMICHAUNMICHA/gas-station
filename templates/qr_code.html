@@ -1,0 +1,83 @@
+
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code - ระบบซื้อ น้ำมัน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: 'Roboto', sans-serif;
+            background-color: #d9f8d9;
+            color: #333;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+        }
+        h1 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #388e3c;
+        }
+        img {
+            border: 5px solid #388e3c;
+            border-radius: 10px;
+            margin-top: 20px;
+            width: 200px; /* ขนาด QR Code */
+            height: 200px; /* ขนาด QR Code */
+        }
+        p {
+            margin-top: 15px;
+            font-size: 16px;
+        }
+        a {
+            color: #388e3c;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #4CAF50;
+            border-radius: 6px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            text-align: left;
+        }
+        .popup.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>QR Code ของสถานีบริการน้ำมัน</h1>
+        <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+        <p>คุณสามารถสแกน QR Code นี้เพื่อไปที่ <a href="https://webpoo.ncwjjdx.work/">เว็บไซต์</a></p>
+    </div>
+    
+  
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบซื้อ น้ำมัน</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #d9f8d9; /* ธีมสีเขียวอ่อน */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            color: #555;
+            font-size: 16px;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            height: 40px;
+            width: 40px;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            height: 40px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        input[type="submit"] {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            height: 40px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #2f7431;
+        }
+
+        .price {
+            text-align: center;
+            font-size: 18px;
+            margin: 10px 0;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* Popup styles */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #28a745; /* สีเขียวสดใส */
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            transition: opacity 0.3s ease;
+            text-align: center;
+            font-size: 18px;
+            animation: fadeIn 0.5s, fadeOut 0.5s 2.5s forwards;
+        }
+
+        .popup.show {
+            display: block;
+            opacity: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>กรอกข้อมูลน้ำมัน</h2>
+
+        <form id="fuel-form">
+            <label for="fuel-type">ประเภทน้ำมัน:</label>
+            <select id="fuel-type" name="fuel-type" onchange="updatePrice()">
+                <option value="34.88">น้ำมัน 91 (34.88 บาท)</option>
+                <option value="35.25">น้ำมัน 95 (35.25 บาท)</option>
+                <option value="43.54">เบนซิน (43.54 บาท)</option>
+            </select>
+            <div class="price" id="current-price">ราคา: 34.88 บาทต่อลิตร</div>
+            <label for="liters">จำนวนลิตร:</label>
+            <div class="button-container">
+                <button type="button" aria-label="ลดจำนวนลิตร" onclick="changeLiters(-1)">-</button>
+                <input type="number" id="liters" name="liters" value="0" min="0" readonly>
+                <button type="button" aria-label="เพิ่มจำนวนลิตร" onclick="changeLiters(1)">+</button>
+            </div>
+            <label for="amount">จำนวนเงิน:</label>
+            <input type="number" id="amount" name="amount" step="0.01" required>
+
+            <input type="submit" value="ยอมรับ">
+        </form>
+    </div>
+
+    <div class="popup" id="success-popup">ทำรายการสำเร็จ!</div>
+
+    <script>
+        let pricePerLiter = 34.88; // เริ่มต้นราคาน้ำมัน 91
+
+        function updatePrice() {
+            const fuelType = document.getElementById('fuel-type');
+            pricePerLiter = parseFloat(fuelType.value);
+            document.getElementById('current-price').textContent = `ราคา: ${pricePerLiter} บาทต่อลิตร`;
+            changeLiters(0); // อัปเดตจำนวนเงินหากมีการเปลี่ยนประเภทน้ำมัน
+        }
+
+        function changeLiters(amount) {
+            const litersInput = document.getElementById('liters');
+            let currentValue = parseInt(litersInput.value) || 0;
+
+            // Prevent reducing below zero
+            if (amount < 0 && currentValue === 0) {
+                alert("ไม่สามารถลดจำนวนลิตรได้อีก");
+                return;
+            }
+
+            currentValue += amount;
+            litersInput.value = currentValue;
+
+            const calculatedAmount = (currentValue * pricePerLiter).toFixed(2);
+            document.getElementById('amount').value = calculatedAmount;
+
+            // Validate amount input
+            const amountInput = document.getElementById('amount');
+            if (amountInput.value != calculatedAmount) {
+                amountInput.setCustomValidity("จำนวนเงินไม่ตรงกับจำนวนลิตร");
+            } else {
+                amountInput.setCustomValidity("");
+            }
+        }
+
+        document.getElementById('fuel-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // ป้องกันการส่งฟอร์มทันที
+
+            const fuelType = document.getElementById('fuel-type');
+            const litersInput = document.getElementById('liters');
+            const amountInput = document.getElementById('amount');
+
+            // Create a JSON object with the necessary data
+            const data = {
+                fuel_name: "gas " + fuelType.options[fuelType.selectedIndex].text.split(' ')[1], // Combine gas with the type
+                unit: fuelType.value,
+                liters: parseInt(litersInput.value) || 0,
+                amount: parseFloat(amountInput.value) || 0
+            };
+
+            // Send data to the server using fetch
+            fetch('/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => {
+                if (response.ok) {
+                    // Show success popup and reload page after 3 seconds
+                    showPopup("ทำรายการสำเร็จ!");
+                    setTimeout(() => {
+                        location.reload();
+                    }, 3000);
+                } else {
+                    alert("เกิดข้อผิดพลาดในการทำรายการ");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("เกิดข้อผิดพลาดในการทำรายการ");
+            });
+        });
+
+        function showPopup(message) {
+            const popup = document.getElementById('success-popup');
+            popup.textContent = message;
+            popup.classList.add('show');
+
+            // Hide popup after 3 seconds
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
