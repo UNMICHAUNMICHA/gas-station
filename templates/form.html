@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #d9f8d9; /* ธีมสีเขียวอ่อน */
+            background-color: #d9f8d9; 
             display: flex;
             justify-content: center;
             align-items: center;
@@ -97,14 +97,14 @@
             font-weight: bold;
         }
 
-        /* Popup styles */
+   
         .popup {
             display: none;
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background-color: #28a745; /* สีเขียวสดใส */
+            background-color: #28a745;
             color: white;
             padding: 20px;
             border-radius: 10px;
@@ -160,20 +160,18 @@
     <div class="popup" id="success-popup">ทำรายการสำเร็จ!</div>
 
     <script>
-        let pricePerLiter = 34.88; // เริ่มต้นราคาน้ำมัน 91
-
+        let pricePerLiter = 34.88; 
         function updatePrice() {
             const fuelType = document.getElementById('fuel-type');
             pricePerLiter = parseFloat(fuelType.value);
             document.getElementById('current-price').textContent = `ราคา: ${pricePerLiter} บาทต่อลิตร`;
-            changeLiters(0); // อัปเดตจำนวนเงินหากมีการเปลี่ยนประเภทน้ำมัน
+            changeLiters(0); 
         }
 
         function changeLiters(amount) {
             const litersInput = document.getElementById('liters');
             let currentValue = parseInt(litersInput.value) || 0;
 
-            // Prevent reducing below zero
             if (amount < 0 && currentValue === 0) {
                 alert("ไม่สามารถลดจำนวนลิตรได้อีก");
                 return;
@@ -185,7 +183,6 @@
             const calculatedAmount = (currentValue * pricePerLiter).toFixed(2);
             document.getElementById('amount').value = calculatedAmount;
 
-            // Validate amount input
             const amountInput = document.getElementById('amount');
             if (amountInput.value != calculatedAmount) {
                 amountInput.setCustomValidity("จำนวนเงินไม่ตรงกับจำนวนลิตร");
@@ -195,21 +192,18 @@
         }
 
         document.getElementById('fuel-form').addEventListener('submit', function(event) {
-            event.preventDefault(); // ป้องกันการส่งฟอร์มทันที
-
+            event.preventDefault(); 
             const fuelType = document.getElementById('fuel-type');
             const litersInput = document.getElementById('liters');
             const amountInput = document.getElementById('amount');
 
-            // Create a JSON object with the necessary data
             const data = {
-                fuel_name: "gas " + fuelType.options[fuelType.selectedIndex].text.split(' ')[1], // Combine gas with the type
+                fuel_name: fuelType.options[fuelType.selectedIndex].text.includes("เบนซิน") ? "benzene" : "gas " + fuelType.options[fuelType.selectedIndex].text.split(' ')[1], // ใช้ "benzene" หากเป็นเบนซิน
                 unit: fuelType.value,
                 liters: parseInt(litersInput.value) || 0,
                 amount: parseFloat(amountInput.value) || 0
             };
 
-            // Send data to the server using fetch
             fetch('/submit', {
                 method: 'POST',
                 headers: {
@@ -219,7 +213,6 @@
             })
             .then(response => {
                 if (response.ok) {
-                    // Show success popup and reload page after 3 seconds
                     showPopup("ทำรายการสำเร็จ!");
                     setTimeout(() => {
                         location.reload();
@@ -239,7 +232,6 @@
             popup.textContent = message;
             popup.classList.add('show');
 
-            // Hide popup after 3 seconds
             setTimeout(() => {
                 popup.classList.remove('show');
             }, 3000);
