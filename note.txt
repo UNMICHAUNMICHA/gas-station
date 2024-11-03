@@ -1,0 +1,2 @@
+Stop-Service -Name cloudflared
+Get-Service -Name cloudflared
