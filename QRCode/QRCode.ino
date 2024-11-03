@@ -68,7 +68,7 @@ void loop() {
     int SwitchValue = digitalRead(SwitchPin);
     if (SwitchValue == LOW && receivedLiters > 0) {
         digitalWrite(PumpPin, ON);
-        float currentLiters = receivedLiters; /
+        float currentLiters = receivedLiters; 
 
         unsigned long fillTime = (unsigned long)(receivedLiters * 28 * 1000); 
 
@@ -76,7 +76,12 @@ void loop() {
         while (millis() - startTime < fillTime) {
             LCD4();
             currentLiters = receivedLiters - ((millis() - startTime) / 1000.0) / 28.0;
-            currentLiters = max(currentLiters, 0.0); 
+            currentLiters = max(currentLiters, 0.0);
+            
+            // แสดงค่าใน Serial Monitor
+            Serial.print("Current Liters: ");
+            Serial.println(currentLiters);
+
             displayLitersIncrementally(currentLiters);
         }
 
