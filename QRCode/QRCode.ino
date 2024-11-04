@@ -68,20 +68,13 @@ void loop() {
     int SwitchValue = digitalRead(SwitchPin);
     if (SwitchValue == LOW && receivedLiters > 0) {
         digitalWrite(PumpPin, ON);
-        float currentLiters = receivedLiters; 
 
         unsigned long fillTime = (unsigned long)(receivedLiters * 28 * 1000); 
 
         unsigned long startTime = millis();
         while (millis() - startTime < fillTime) {
-            LCD4();
-            currentLiters = receivedLiters - ((millis() - startTime) / 1000.0) / 28.0;
-            currentLiters = max(currentLiters, 0.0);
-            
-            // แสดงค่าใน Serial Monitor
-            Serial.print("Current Liters: ");
-            Serial.println(currentLiters);
-
+            float currentLiters = receivedLiters - ((millis() - startTime) / 1000.0) / 28.0;
+            currentLiters = max(currentLiters, 0.0f);  
             displayLitersIncrementally(currentLiters);
         }
 
@@ -125,10 +118,9 @@ void fetchData() {
             if (!error) {
                 fuelName = doc["fuel_name"].isNull() ? "" : doc["fuel_name"].as<String>();
                 unit = doc["unit"].isNull() ? "" : doc["unit"].as<String>();
-                receivedLiters = doc["liters"].isNull() ? 0 : doc["liters"];
-                amount = doc["amount"].isNull() ? 0 : doc["amount"];
+                receivedLiters = doc["liters"].isNull() ? 0.0f : doc["liters"].as<float>();
+                amount = doc["amount"].isNull() ? 0.0f : doc["amount"].as<float>();
 
-                // แสดงค่าที่ได้รับใน Serial Monitor
                 Serial.print("Fuel Name: "); Serial.println(fuelName);
                 Serial.print("Unit: "); Serial.println(unit);
                 Serial.print("Received Liters: "); Serial.println(receivedLiters);
