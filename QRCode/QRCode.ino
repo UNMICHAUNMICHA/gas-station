@@ -23,12 +23,11 @@ LiquidCrystal_I2C lcd5(0x23, 16, 2);
 #define OFF LOW
 
 float receivedLiters = 0;
-float totalOilInTank = 100000;  
+float totalOilInTank = 200;  
 String fuelName = "";
 String unit = "";
 float amount = 0;
 bool isWaitingForButton = false; 
-
 
 void setup() {
     Serial.begin(115200);
@@ -61,7 +60,6 @@ void loop() {
     if (!isWaitingForButton) {
         fetchData();
     }
-
     LCD2();
     LCD3();
     LCD4();
@@ -70,14 +68,21 @@ void loop() {
     int SwitchValue = digitalRead(SwitchPin);
     if (SwitchValue == LOW && receivedLiters > 0) {
         digitalWrite(PumpPin, ON);
-        float currentLiters = 0.0;
+        float currentLiters = receivedLiters; 
 
-        while (currentLiters < receivedLiters) {
-            currentLiters += 0.01;
-            currentLiters = round(currentLiters * 100) / 100; 
+        unsigned long fillTime = (unsigned long)(receivedLiters * 28 * 1000); 
+
+        unsigned long startTime = millis();
+        while (millis() - startTime < fillTime) {
+            LCD4();
+            currentLiters = receivedLiters - ((millis() - startTime) / 1000.0) / 28.0;
+            currentLiters = max(currentLiters, 0.0);
+            
+            // แสดงค่าใน Serial Monitor
+            Serial.print("Current Liters: ");
+            Serial.println(currentLiters);
+
             displayLitersIncrementally(currentLiters);
-            LCD1(); 
-            delay(100); 
         }
 
         digitalWrite(PumpPin, OFF);
@@ -87,18 +92,18 @@ void loop() {
     } else if (receivedLiters > 0) {
         isWaitingForButton = true; 
     }
-
-    LCD1(); 
-    delay(500); 
+    LCD1();
+    delay(2000);
 }
 
 void displayLitersIncrementally(float currentLiters) {
-    lcd4.clear();
+    lcd4.clear(); 
     lcd4.setCursor(0, 0);
     lcd4.print("Filled: ");
     lcd4.setCursor(8, 0); 
     lcd4.print(currentLiters, 2); 
-    lcd4.print(" L"); 
+    lcd4.print(" L     ");
+    delay(1000);
 }
 
 void fetchData() {
@@ -118,14 +123,19 @@ void fetchData() {
             DynamicJsonDocument doc(1024);
             auto error = deserializeJson(doc, response);
             if (!error) {
-                fuelName = doc["fuel_name"].as<String>();
-                unit = doc["unit"].as<String>();
-                receivedLiters = doc["liters"];
-                amount = doc["amount"];
+                fuelName = doc["fuel_name"].isNull() ? "" : doc["fuel_name"].as<String>();
+                unit = doc["unit"].isNull() ? "" : doc["unit"].as<String>();
+                receivedLiters = doc["liters"].isNull() ? 0 : doc["liters"];
+                amount = doc["amount"].isNull() ? 0 : doc["amount"];
+
+                // แสดงค่าที่ได้รับใน Serial Monitor
+                Serial.print("Fuel Name: "); Serial.println(fuelName);
+                Serial.print("Unit: "); Serial.println(unit);
+                Serial.print("Received Liters: "); Serial.println(receivedLiters);
+                Serial.print("Amount: "); Serial.println(amount);
             } else {
                 Serial.println("JSON deserialization failed");
             }
-            
         } else {
             Serial.print("Error on sending GET: ");
             Serial.println(httpResponseCode);
@@ -188,14 +198,13 @@ void LCD4() {
     lcd4.setCursor(0, 0);
     lcd4.print("Filled: ");
     lcd4.setCursor(15, 0);
-    // lcd4.print("L");
 }
 
 void LCD5() {
     lcd5.clear();
     lcd5.setCursor(3, 0);
     lcd5.print("Oil in Tank");
-    lcd5.setCursor(3, 1);
+    lcd5.setCursor(5, 1);
     lcd5.print(totalOilInTank);
     lcd5.print(" L");
 }
