@@ -145,13 +145,9 @@
             </select>
             <div class="price" id="current-price">ราคา: 34.88 บาทต่อลิตร</div>
             <label for="liters">จำนวนลิตร:</label>
-            <div class="button-container">
-                <button type="button" aria-label="ลดจำนวนลิตร" onclick="changeLiters(-1)">-</button>
-                <input type="number" id="liters" name="liters" value="0" min="0" readonly>
-                <button type="button" aria-label="เพิ่มจำนวนลิตร" onclick="changeLiters(1)">+</button>
-            </div>
+            <input type="number" id="liters" name="liters" value="0" min="0" readonly>
             <label for="amount">จำนวนเงิน:</label>
-            <input type="number" id="amount" name="amount" step="0.01" required>
+            <input type="number" id="amount" name="amount" step="0.01" required oninput="updateLiters()">
 
             <input type="submit" value="ยอมรับ">
         </form>
@@ -161,34 +157,21 @@
 
     <script>
         let pricePerLiter = 34.88; 
+
         function updatePrice() {
             const fuelType = document.getElementById('fuel-type');
             pricePerLiter = parseFloat(fuelType.value);
             document.getElementById('current-price').textContent = `ราคา: ${pricePerLiter} บาทต่อลิตร`;
-            changeLiters(0); 
+            updateLiters(); 
         }
 
-        function changeLiters(amount) {
-            const litersInput = document.getElementById('liters');
-            let currentValue = parseInt(litersInput.value) || 0;
-
-            if (amount < 0 && currentValue === 0) {
-                alert("ไม่สามารถลดจำนวนลิตรได้อีก");
-                return;
-            }
-
-            currentValue += amount;
-            litersInput.value = currentValue;
-
-            const calculatedAmount = (currentValue * pricePerLiter).toFixed(2);
-            document.getElementById('amount').value = calculatedAmount;
-
+        function updateLiters() {
             const amountInput = document.getElementById('amount');
-            if (amountInput.value != calculatedAmount) {
-                amountInput.setCustomValidity("จำนวนเงินไม่ตรงกับจำนวนลิตร");
-            } else {
-                amountInput.setCustomValidity("");
-            }
+            const litersInput = document.getElementById('liters');
+            const amountValue = parseFloat(amountInput.value) || 0;
+
+            const calculatedLiters = (amountValue / pricePerLiter).toFixed(2);
+            litersInput.value = calculatedLiters;
         }
 
         document.getElementById('fuel-form').addEventListener('submit', function(event) {
@@ -198,9 +181,9 @@
             const amountInput = document.getElementById('amount');
 
             const data = {
-                fuel_name: fuelType.options[fuelType.selectedIndex].text.includes("เบนซิน") ? "benzene" : "gas " + fuelType.options[fuelType.selectedIndex].text.split(' ')[1], // ใช้ "benzene" หากเป็นเบนซิน
+                fuel_name: fuelType.options[fuelType.selectedIndex].text.includes("เบนซิน") ? "benzene" : "gas " + fuelType.options[fuelType.selectedIndex].text.split(' ')[1], 
                 unit: fuelType.value,
-                liters: parseInt(litersInput.value) || 0,
+                liters: parseFloat(litersInput.value) || 0,
                 amount: parseFloat(amountInput.value) || 0
             };
 
